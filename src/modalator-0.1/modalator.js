@@ -59,7 +59,6 @@ var Modalator = (function() {
 
         var body = document.createElement('div');
         body.setAttribute('class', 'modal-body');
-        dialog.appendChild(body);
 
         if (!arg.fields) { arg.fields = [] }
         for (var i = 0; i < arg.fields.length; i++) {
@@ -67,7 +66,7 @@ var Modalator = (function() {
 
             var label = document.createElement('label');
             label.innerHTML = field.label;
-            dialog.appendChild(label);
+            body.appendChild(label);
 
             if (field.type.match(/^(text|password)$/)) {
                 var input = document.createElement('input');
@@ -75,7 +74,7 @@ var Modalator = (function() {
                 input.setAttribute('type', field.type);
                 input.setAttribute('value', field.value || '');
                 input.setAttribute('class', field.class || '');
-                dialog.appendChild(input);
+                body.appendChild(input);
             }
             else if (field.type === 'select') {
                 var select = document.createElement('select');
@@ -90,9 +89,10 @@ var Modalator = (function() {
                     option.innerHTML = field.options[n].text || ''
                     select.appendChild(option);
                 }
-                dialog.appendChild(select);
+                body.appendChild(select);
             }
         }
+        dialog.appendChild(body);
 
         var foot = document.createElement('div');
         foot.setAttribute('class', 'modal-footer');
