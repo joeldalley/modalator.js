@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">  
+  <head>
+    <title>Modalator :: Dialog</title>
+    <meta charset="utf-8"/>
+    <script src="../assets/jquery-2.1.1.min.js"></script>
+    <script src="../assets/bootstrap-3.3.1/js/bootstrap.min.js"></script>
+    <script src="../assets/bootstrap-modal-2.2.5/js/bootstrap-modalmanager.js"></script>
+    <script src="../assets/bootstrap-modal-2.2.5/js/bootstrap-modal.js"></script>
+    <script src="../src/modalator-0.1/modalator.js"></script>
+    <link rel="stylesheet" href="../assets/bootstrap-3.3.1/css/bootstrap.css"/>
+    <link rel="stylesheet" href="../assets/bootstrap-modal-2.2.5/css/bootstrap-modal-bs3patch.css"/>
+    <link rel="stylesheet" href="../assets/bootstrap-modal-2.2.5/css/bootstrap-modal.css"/>
+  </head>
+  <body style="margin:20px">
+    <script>
+      var launcher = Modalator.launcher.button({
+          text: 'Launch Modal Dialog',
+          href: '#dialog',
+      });
+
+      var dialog = Modalator.dialog({
+          title: 'Input Dialog',
+          attrs: {id: 'dialog', 'data-width': 480},
+          affirm: {
+              click: function() {
+                  $('#dialog').modal('hide');
+                  console.log('TEXT INPUT VAL => ' + 
+                              $('#dialog [name="input-1"]').val());
+                  console.log('SELECTOR VAL => ' +
+                              $('#dialog [name="input-2"]').val());
+              }
+          },
+          cancel: {text: 'Cancel'},
+          fields: [{
+              label: 'Field 1',
+              name: 'input-1',
+              class: 'form-control',
+              type: 'text',
+              value: 'Foobar.'
+          }, {
+              label: 'Field 2',
+              name: 'input-2',
+              class: 'form-control',
+              type: 'select',
+              options: [
+                  {value: 'opt-1', text: 'One'}, 
+                  {value: 'opt-2', text: 'Two'}
+              ],
+          }],
+      });
+
+      document.addEventListener('DOMContentLoaded', function() { 
+          Modalator.appendToDOM([launcher, dialog]);
+      });
+    </script>
+  </body>
+</html>
