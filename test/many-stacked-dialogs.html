@@ -45,15 +45,19 @@
           var width = WIDTH - (60 * num);
 
           dialogs[num] = Modalator.dialog({ 
-              title: {text: 'Input Dialog' + num},
+              title: {text: 'Input Dialog ' + num},
               attrs: {id: id, 'data-width': width},
+              body: {
+                  text: "Dialog number " + num
+                      + ". Don't give up..."
+              },
               affirm: {
-                  text: 'Forward',
+                  text: num + 1 < SIZE ? 'Forward' : 'Finish',
                   attrs: {
                       onclick: callbackConstructor(num)
                   }
               },
-              cancel: {text: 'Back'}
+              cancel: {text: !num ? 'Cancel' : 'Back'}
           });
       }
 
