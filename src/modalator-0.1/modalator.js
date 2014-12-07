@@ -108,11 +108,10 @@ var Modalator = (function() {
         head.appendChild(x);
 
         // Modal dialog header text.
-        var titleTag = arg.title.tag || 'h2';
-        var title = document.createElement(titleTag);
-        title.innerHTML = arg.title.text || 'Dialog';
-        attrs = arg.title.attrs || {};
-        setAttributes(title, attrs);
+        var titleCfg = arg.title || {};
+        var title = document.createElement(titleCfg.tag || 'h2');
+        title.innerHTML = titleCfg.text || 'Dialog';
+        setAttributes(title, titleCfg.attrs || {});
         head.appendChild(title);
         dialog.appendChild(head);
 
@@ -121,6 +120,13 @@ var Modalator = (function() {
         attrs = arg.body && arg.body.attrs || {};
         attrs.class = attrs.class || 'modal-body';
         setAttributes(body, attrs);
+
+        // Optional body text, before any fields.
+        if (arg.body && arg.body.text) {
+            var bodyText = document.createElement('div');
+            bodyText.innerHTML = arg.body.text;
+            body.appendChild(bodyText);
+        }
 
         // Modal dialog fields.
         if (!arg.fields) { arg.fields = [] }
@@ -173,16 +179,15 @@ var Modalator = (function() {
         setAttributes(cancel, attrs);
 
         // Affirm button.
+        var affirmCfg = arg.affirm || {};
         var affirm = document.createElement('button');
-        affirm.innerHTML = arg.affirm.text || 'Submit';
-        attrs = arg.affirm.attrs || {};
-
-        if (attrs.href) {
-            attrs['data-toggle'] = 'modal';
-            attrs.href = attrs.href;
-        }
-
+        affirm.innerHTML = affirmCfg.text || 'Submit';
+        attrs = affirmCfg.attrs || {};
         attrs.class = attrs.class || 'btn btn-primary';
+        if (!attrs.onclick) {
+            attrs['data-toggle'] = 'modal';
+            attrs.href = attrs.href || '#' + arg.attrs.id;
+        }
         setAttributes(affirm, attrs);
 
         foot.appendChild(cancel);
