@@ -20,7 +20,7 @@
 
       var launcher = Modalator.launcher.button({
           text: 'Launch Modal Dialog',
-          href: '#' + PREFIX + '0',
+          attrs: {href: '#' + PREFIX + '0'}
       });
 
       var callbackConstructor = function(idx) {
@@ -45,11 +45,13 @@
           var width = WIDTH - (60 * num);
 
           dialogs[num] = Modalator.dialog({ 
-              title: 'Input Dialog ' + num,
+              title: {text: 'Input Dialog' + num},
               attrs: {id: id, 'data-width': width},
               affirm: {
                   text: 'Forward',
-                  click: callbackConstructor(num)
+                  attrs: {
+                      onclick: callbackConstructor(num)
+                  }
               },
               cancel: {text: 'Back'}
           });

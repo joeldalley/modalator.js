@@ -17,36 +17,51 @@
     <script>
       var launcher = Modalator.launcher.button({
           text: 'Launch Modal Dialog',
-          href: '#dialog',
+          attrs: {href: '#dialog'},
       });
 
       var confirmCallback = function(dialogId, confirmId) {
           $('#' + confirmId).modal('hide');
           $('#' + dialogId).modal('hide');
-          console.log('TEXT INPUT VAL => ' + 
+          console.log('TEXT VAL   => ' + 
                       $('#dialog [name="input-1"]').val());
-          console.log('SELECTOR VAL => ' +
+          console.log('SELECT VAL => ' +
                       $('#dialog [name="input-2"]').val());
       };
 
       var [dialog, confirmDialog] = Modalator.dialogWithConfirm({
-          title: 'Input Dialog',
+          title: {text: 'Dialog w/ Confirm', tag: 'h3'},
           attrs: {id: 'dialog', 'data-width': 360},
-          affirm: {text: 'Save'},
+          affirm: {
+              text: 'Save',
+              attrs: {
+                  // Override the default affirm behavior, which is 
+                  // defined inside of Modalator.dialogWithConfirm().
+                  onclick: function() {
+                      console.log('Advancing to confirmation dialog.');
+                      var confirmId = confirmDialog.getAttribute('id');
+                      $('#' + confirmId).modal('show');
+                  }
+              }
+          },
           fields: [{
               label: 'Field 1',
-              name: 'input-1',
-              class: 'form-control',
               type: 'text',
-              value: 'Foobar.'
+              attrs: {
+                  name: 'input-1',
+                  class: 'form-control',
+                  value: 'Foobar.'
+              }
           }, {
               label: 'Field 2',
-              name: 'input-2',
-              class: 'form-control',
               type: 'select',
+              attrs: {
+                  name: 'input-2',
+                  class: 'form-control',
+              },
               options: [
-                  {value: 'opt-1', text: 'One'}, 
-                  {value: 'opt-2', text: 'Two'}
+                  {text: 'One', attrs: {value: 'opt-1'}},
+                  {text: 'Two', attrs: {value: 'opt-2'}}
               ],
           }],
       }, confirmCallback);

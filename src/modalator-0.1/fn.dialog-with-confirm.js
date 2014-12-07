@@ -2,20 +2,20 @@ Modalator.dialogWithConfirm = function(dialogConfig, confirmCallback) {
     var dialogId = dialogConfig.attrs.id;
     var confirmId = dialogId + '-confirm';
 
-    dialogConfig.affirm.tabindex = '-2';
-    dialogConfig.affirm.href = '#' + confirmId;
+    dialogConfig.attrs.href = '#' + confirmId;
+    dialogConfig.attrs.tabindex = '-2';
     var dialog = Modalator.dialog(dialogConfig);
-    Modalator.dialog(dialogId);
-    Modalator.dialog(dialogId);
 
     var confirmDialog = Modalator.dialog({
-        title: 'Are you sure?',
+        title: {text: 'Are you sure?', tag: 'h3'},
         attrs: {id: confirmId, tabindex: '-1', 'data-width': 200},
         affirm: {
             text: 'Yes',
-            click: function() {
-                confirmCallback(dialogId, confirmId);
-            },
+            attrs: {
+                onclick: function() {
+                    confirmCallback(dialogId, confirmId);
+                }
+            }
         },
         cancel: {text: 'No'}
     });
