@@ -8,7 +8,9 @@ EXAMPLES
 
 * [Single Dialog](https://joeldalley.github.io/modalator.js/test/dialog.html)<br/>
 * [Dialog w/ Confirmation](https://joeldalley.github.io/modalator.js/test/dialog-with-confirm.html)<br/>
+* [Information-only Dialog](https://joeldalley.github.io/modalator.js/test/minimal.html)<br/>
 * [Many Stacked Dialogs](https://joeldalley.github.io/modalator.js/test/many-stacked-dialogs.html)<br/>
+* [Dialog / Dynamic Fields](https://joeldalley.github.io/modalator.js/test/dynamic-fields.html)
 
 COPYRIGHT & LICENSE
 ===================
