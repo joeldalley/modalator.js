@@ -133,9 +133,13 @@ var Modalator = (function() {
         for (var i = 0; i < arg.fields.length; i++) {
             var fieldCfg = arg.fields[i];
 
-            var label = document.createElement('label');
-            label.innerHTML = fieldCfg.label;
-            body.appendChild(label);
+            var labelCfg = fieldCfg.label;
+            if (labelCfg) {
+                var label = document.createElement('label');
+                label.innerHTML = labelCfg.text || '';
+                setAttributes(label, labelCfg.attrs || {});
+                body.appendChild(label);
+            }
 
             if (fieldCfg.type.match(/^(text|password)$/)) {
                 var input = document.createElement('input');
@@ -144,13 +148,11 @@ var Modalator = (function() {
             }
             else if (fieldCfg.type === 'select') {
                 var select = document.createElement('select');
-                attrs = fieldCfg.attrs || {};
                 setAttributes(select, fieldCfg.attrs || {});
 
                 if (!fieldCfg.options) { fieldCfg.options = [] }
                 for (var n = 0; n < fieldCfg.options.length; n++) {
                     var optCfg = fieldCfg.options[n] || {};
-
                     var option = document.createElement('option');
                     option.innerHTML = optCfg.text || '';
                     setAttributes(option, optCfg.attrs || {});
