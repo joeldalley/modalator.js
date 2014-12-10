@@ -6,7 +6,7 @@ Captures common bootstrap modal usage patterns.
 EXAMPLES
 ========
 
-* [Examples page](https://joeldalley.github.io/modalator.js/examples.html).
+[Examples page](https://joeldalley.github.io/modalator.js/examples.html).
 
 COPYRIGHT & LICENSE
 ===================
