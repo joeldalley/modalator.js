@@ -1,28 +1,28 @@
 /**
  * @method Modalator.dialogWithConfirm().
- * @param object dialogConfig A dialog configuration.
- * @param function confirmCallback A callback function, which accepts two
- *                 arguments: the dialog and its confirm dialog div ids.
+ * @param object config A dialog configuration.
  * @return array Pair of (<div>, <div>): the dialog and its confirm dialog.
  */
-Modalator.dialogWithConfirm = function(dialogConfig, confirmCallback) {
-    var dialogId = dialogConfig.attrs.id;
-    var confirmId = dialogId + '-confirm';
- 
+Modalator.dialogWithConfirm = function(config) {
+    'use strict'; 
+
     // By default, when the dialog affirm button is 
     // clicked, advance to the confirmation dialog.
-    dialogConfig.attrs.href = '#' + confirmId;
+    var confirmId = config.attrs.id + '-confirm';
 
-    var dialog = Modalator.dialog(dialogConfig);
+    if (!config.affirm) { config.affirm = {attrs: {}} }
+    else if (!config.affirm.attrs) { config.affirm.attrs = {} }
+    config.affirm.attrs.href = '#' + confirmId;
 
-    var onConfirmClick = function() { 
-        confirmCallback(dialogId, confirmId)
-    };
+    var dialog = Modalator.dialog(config);
 
     var confirmDialog = Modalator.dialog({
         title: {text: 'Are you sure?', tag: 'h3'},
         attrs: {id: confirmId, 'data-width': 200},
-        affirm: {text: 'Yes', attrs: {onclick: onConfirmClick}},
+        affirm: {
+            text: 'Yes', 
+            attrs: {onclick: config.confirmCallback}
+        },
         cancel: {text: 'No'}
     });
 
