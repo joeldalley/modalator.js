@@ -4,10 +4,9 @@
  * @version 2014/Dec/06
  */
 var Modalator = (function() {
-    var DIALOG_DEFAULT_WIDTH = 240;
+    'use strict'; 
 
-    // Cache constructed modal dialogs.
-    var dialogs = {};
+    var DIALOG_DEFAULT_WIDTH = 240;
 
     /**
      * @function setAttributes().
@@ -21,6 +20,12 @@ var Modalator = (function() {
                 ? node[name] = attrs[name]
                 : node.setAttribute(name, attrs[name]);
         }
+    }
+
+    function combinedAttributes(attrs, defaults) {
+        var combined = defaults || {};
+        for (var key in attrs) { combined[key] = attrs[key] }
+        return combined;
     }
 
     /**
@@ -39,71 +44,82 @@ var Modalator = (function() {
         }
     }
 
-    /**
-     * A <button> constructor.
-     * @method Modalator.launcher.button() 
-     * @param object config Button configuration.
-     * @return <button> The configured DOM node.
-     */
     var launcher = {
+        /**
+         * A <button> constructor.
+         * @method Modalator.launcher.button() 
+         * @param object config Button configuration.
+         * @return <button> The configured DOM node.
+         */
         button: function(config) {
-            var attrs = config.attrs || {};
-            attrs.type = 'button';
-            attrs['data-toggle'] = 'modal';
-            attrs.href = attrs.href || '#';
-            attrs.class = attrs.class || 'btn btn-primary';
+            var attrs = combinedAttributes(config.attrs || {}, {
+                type: 'button',
+                'data-toggle': 'modal',
+                href: '#',
+                class: 'btn btn-primary'
+            });
 
             var btn = document.createElement('button');
             btn.innerHTML = config.text || 'Launch';
             setAttributes(btn, attrs);
             return btn;
         },
+
+        /**
+         * An <a> constructor.
+         * @method Modalator.launcher.anchor() 
+         * @param object config Anchor configuration.
+         * @return <a> The configured DOM node.
+         */
+         anchor: function(config) {
+            var attrs = combinedAttributes(config.attrs || {}, {
+                'data-toggle': 'modal',
+                href: '#',
+                class: 'text-primary'
+            });
+
+            var a = document.createElement('a');
+            a.innerHTML = config.text || 'Launch';
+            setAttributes(a, attrs);
+            return a;
+         }
     };
     
     /**
      * A bootstrap modal dialog constructor.
      * @method Modalator.dialog().
-     * @param mixed arg string|object
-     *   - if arg is a string, return the cached dialog.
-     *   - if arg is an object, construct, cache & return a dialog.
+     * @param mixed arg object Dialog configuration.
      * @return <div> The configured bootstrap modal dialog DOM node.
      */
     var dialog = function(arg) {
-        // Attempt to load from cache.
-        if (typeof arg === 'string') {
-            if (typeof dialogs[arg] !== 'undefined') {
-                return dialogs[arg];
-            }
-            else {
-                throw "No registered dialog `" + arg + "`";
-            }
-        }
-
         var attrs;
 
         // Modal dialog container div.
         var dialog = document.createElement('div');
-        attrs = arg.attrs || {};
-        attrs['data-width'] = attrs['data-width'] || DIALOG_DEFAULT_WIDTH;
-        attrs.style = attrs.style || 'display:none';
-        attrs.class = attrs.class || 'modal fade';
-        attrs.tabindex = attrs.tabindex || '-1';
+        attrs = combinedAttributes(arg.attrs || {}, {
+            'data-width': DIALOG_DEFAULT_WIDTH,
+            style: 'display:none',
+            class: 'modal fade',
+            tabindex: '-1'
+        });
         setAttributes(dialog, attrs);
 
         // Modal dialog header.
         var head = document.createElement('div');
-        attrs = arg.head && arg.head.attrs || {};
-        attrs.class = attrs.class || 'modal-header';
+        attrs = combinedAttributes(arg.head && arg.head.attrs || {}, {
+            class: 'modal-header'
+        });
         setAttributes(head, attrs);
         
         // Modal dialog "x" (cancel) button.
         var x = document.createElement('button');
         x.innerHTML = 'x';
-        attrs = arg.x && arg.x.attrs || {};
-        attrs.type = 'button';
-        attrs.class = 'close';
-        attrs['aria-hidden'] = 'true';
-        attrs['data-dismiss'] = 'modal';
+        attrs = combinedAttributes(arg.x && arg.x.attrs || {}, {
+            type: 'button',
+            class: 'close',
+            'aria-hidden': 'true',
+            'data-dismiss': 'modal'
+        });
         setAttributes(x, attrs);
         head.appendChild(x);
 
@@ -117,48 +133,65 @@ var Modalator = (function() {
 
         // Modal dialog body.
         var body = document.createElement('div');
-        attrs = arg.body && arg.body.attrs || {};
-        attrs.class = attrs.class || 'modal-body';
+        attrs = combinedAttributes(arg.body && arg.body.attrs || {}, {
+            class: 'modal-body'
+        });
         setAttributes(body, attrs);
 
         // Optional body text, before any fields.
         if (arg.body && arg.body.text) {
             var bodyText = document.createElement('div');
+            setAttributes(bodyText, arg.body.text.attrs || {});
             bodyText.innerHTML = arg.body.text;
             body.appendChild(bodyText);
         }
 
         // Modal dialog fields.
-        if (!arg.fields) { arg.fields = [] }
-        for (var i = 0; i < arg.fields.length; i++) {
+        var fieldsLen = arg.fields ? arg.fields.length : 0;
+        for (var i = 0; i < fieldsLen; i++) {
             var fieldCfg = arg.fields[i];
+            var fieldParent = body;
+
+            var fieldContainerCfg = fieldCfg.container;
+            if (fieldContainerCfg) {
+                var containerTag = fieldContainerCfg.tag || 'div';
+                var container = document.createElement(containerTag);
+                setAttributes(container, fieldContainerCfg.attrs || {});
+                body.appendChild(container); 
+                fieldParent = container;
+            }
 
             var labelCfg = fieldCfg.label;
             if (labelCfg) {
                 var label = document.createElement('label');
                 label.innerHTML = labelCfg.text || '';
                 setAttributes(label, labelCfg.attrs || {});
-                body.appendChild(label);
+                fieldParent.appendChild(label);
             }
+
+            attrs = combinedAttributes(fieldCfg.attrs || {}, {
+                class: 'form-control'
+            });
 
             if (fieldCfg.type.match(/^(text|password)$/)) {
                 var input = document.createElement('input');
-                setAttributes(input, fieldCfg.attrs || {});
-                body.appendChild(input);
+                setAttributes(input, attrs);
+                fieldParent.appendChild(input);
             }
             else if (fieldCfg.type === 'select') {
                 var select = document.createElement('select');
-                setAttributes(select, fieldCfg.attrs || {});
+                setAttributes(select, attrs);
 
-                if (!fieldCfg.options) { fieldCfg.options = [] }
-                for (var n = 0; n < fieldCfg.options.length; n++) {
+                var optsLen = fieldCfg.options ? fieldCfg.options.length : 0;
+                for (var n = 0; n < optsLen; n++) {
                     var optCfg = fieldCfg.options[n] || {};
                     var option = document.createElement('option');
                     option.innerHTML = optCfg.text || '';
                     setAttributes(option, optCfg.attrs || {});
                     select.appendChild(option);
                 }
-                body.appendChild(select);
+
+                fieldParent.appendChild(select);
             }
         }
 
@@ -166,38 +199,39 @@ var Modalator = (function() {
 
         // Modal dialog footer.
         var foot = document.createElement('div');
-        attrs = arg.foot && arg.foot.attrs || {};
-        attrs.class = 'modal-footer';
+        attrs = combinedAttributes(arg.foot && arg.foot.attrs || {}, {
+            class: 'modal-footer'
+        });
         setAttributes(foot, attrs);
 
         // Cancel button.
         var cancelCfg = arg.cancel || {};
         var cancel = document.createElement('button');
         cancel.innerHTML = cancelCfg.text || 'Cancel';
-        attrs = cancelCfg.attrs || {};
-        attrs.type = 'button';
-        attrs['data-dismiss'] = 'modal';
-        attrs.class = attrs.class || 'btn';
+        attrs = combinedAttributes(cancelCfg.attrs || {}, {
+            type: 'button',
+            'data-dismiss': 'modal',
+            class: 'btn'
+        });
         setAttributes(cancel, attrs);
 
         // Affirm button.
         var affirmCfg = arg.affirm || {};
         var affirm = document.createElement('button');
         affirm.innerHTML = affirmCfg.text || 'Submit';
-        attrs = affirmCfg.attrs || {};
-        attrs.class = attrs.class || 'btn btn-primary';
-        if (!attrs.onclick) {
-            attrs['data-toggle'] = 'modal';
-            attrs.href = attrs.href || '#' + arg.attrs.id;
+
+        var defaults = {class: 'btn btn-primary'};
+        if (!affirmCfg.attrs || !affirmCfg.attrs.onclick) {
+            defaults['data-toggle'] = 'modal';
+            defaults.href = '#' + arg.attrs.id;
         }
+        attrs = combinedAttributes(affirmCfg.attrs || {}, defaults);
         setAttributes(affirm, attrs);
 
         foot.appendChild(cancel);
         foot.appendChild(affirm);
         dialog.appendChild(foot);
 
-        // Cache & return.
-        dialogs[arg.attrs.id] = dialog;
         return dialog;
     };
 

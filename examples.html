@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">  
+  <head>
+    <title>Modalator :: Examples</title>
+    <meta charset="utf-8"/>
+    <script src="assets/jquery-2.1.1.min.js"></script>
+    <script src="assets/bootstrap-3.3.1/js/bootstrap.min.js"></script>
+    <script src="assets/bootstrap-modal-2.2.5/js/bootstrap-modalmanager.js"></script>
+    <script src="assets/bootstrap-modal-2.2.5/js/bootstrap-modal.js"></script>
+    <script src="src/modalator-0.1/modalator.js"></script>
+    <script src="src/modalator-0.1/fn.dialog-with-confirm.js"></script>
+    <link rel="stylesheet" href="assets/bootstrap-3.3.1/css/bootstrap.css"/>
+    <link rel="stylesheet" href="assets/bootstrap-modal-2.2.5/css/bootstrap-modal-bs3patch.css"/>
+    <link rel="stylesheet" href="assets/bootstrap-modal-2.2.5/css/bootstrap-modal.css"/>
+    <style>
+    pre {
+        height:240px;
+        width:640px;
+    }
+
+    pre.min-dialog {
+        height:130px;
+        width:400px;
+    }
+
+    pre.info-dialog {
+        height:290px;
+        width:400px;
+    }
+
+    div.output {
+        padding:10px;
+    }
+    div.output span {
+        display:inline-block;
+        padding:5px 10px 5px 10px;
+        margin:0 10px 0 10px;
+        background-color:#eee;
+        border:1px #ddd solid;
+        border-radius:3px;
+    }
+    </style>
+    <script>
+      function ltgt(str) {
+          return String(str).replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+      }
+
+      function configPre(config) {
+          var pre = document.createElement('pre');
+          pre.setAttribute('class', config.attrs.id);
+          pre.innerHTML = JSON.stringify(config, function(k, v) {
+              return (typeof v === 'function') 
+                   ? v.toString().replace(/\n\s*/g, ' ') : v;
+          }, 2);
+          return pre;
+      }
+
+      function appendAll(config, modalNodes) {
+          var dialogId = config.attrs.id;
+
+          var configContainer = document.getElementById(dialogId + '-config');
+          var modalContainer = document.getElementById(dialogId + '-modal');
+
+          Modalator.appendToDOM([configPre(config)], configContainer);
+          Modalator.appendToDOM(modalNodes, modalContainer);
+      }
+    </script>
+  </head>
+  <body style="margin:20px">
+    <h1>modalator.js Examples</h1>
+
+    <!-- Minimal Configuration Modal -->
+    <script>
+      (function(dialogId) {
+          document.addEventListener('DOMContentLoaded', function() { 
+              var config = {attrs: {id: dialogId}};
+              appendAll(config, [
+                  Modalator.launcher.button({attrs: {href: '#' + dialogId}}),
+                  Modalator.dialog(config)
+              ])
+          });
+      })('min-dialog');
+    </script>
+    <div class="container">
+      <h3 class="text-primary">Minimal Configuration Dialog</h3>
+      <div id="min-dialog-config"></div>
+      <div id="min-dialog-modal"></div>
+      <div id="min-dialog-output" class="output"></div>
+    </div>
+    <!-- /Minimal Configuration Modal -->
+
+    <!-- Informational Modal -->
+    <script>
+      (function(dialogId) {
+          var launcher = Modalator.launcher.button({
+              text: 'Informational Dialog',
+              attrs: {href: '#' + dialogId}
+          });
+
+          var config = {
+              attrs: {id: dialogId},
+              title: {text: 'FYI'},
+              body: {text: 'Information. No action required.'},
+              affirm: {text: 'OK'}
+          };
+
+          document.addEventListener('DOMContentLoaded', function() { 
+              appendAll(config, [launcher, Modalator.dialog(config)]);
+          });
+      })('info-dialog');
+    </script>
+    <div class="container">
+      <h3 class="text-primary">Informational Dialog</h3>
+      <div id="info-dialog-config"></div>
+      <div id="info-dialog-modal"></div>
+      <div id="info-dialog-output" class="output"></div>
+    </div>
+    <!-- /Informational Modal -->
+
+    <!-- Single Dialog -->
+    <script>
+      (function(dialogId) {
+          var hashId = '#' + dialogId;
+
+          var launcher = Modalator.launcher.button({
+              text: 'Single Dialog', attrs: {href: hashId}
+          });
+
+          var config = {
+              title: {text: 'Input Dialog', tag: 'h3'},
+              attrs: {id: dialogId, 'data-width': 480},
+              affirm: {
+                  attrs: {
+                      id: dialogId + '-affirm',
+                      onclick: function() {
+                          $(hashId).modal('hide');
+                          $(hashId + '-output').append(
+                              ltgt('&lt;span&gt;Sent &lt;b&gt;')
+                              + $(hashId + ' [name="input-1"]').val()
+                              + ltgt('&lt;/b&gt;&lt;/span&gt;')
+                          );
+                      }
+                  }
+              },
+              cancel: {
+                  attrs: {
+                      onclick: function() { 
+                          $(hashId + '-output').append(
+                              ltgt('&lt;span&gt;Canceled&lt;/span&gt;')
+                          )
+                      }
+                  }
+              },
+              fields: [{
+                  container: {tag: 'div', attrs: {style: 'padding:10px'}},
+                  type: 'text',
+                  label: {text: 'Field 1'},
+                  attrs: {name: 'input-1', value: 'Foobar.'}
+              }],
+          };
+
+          document.addEventListener('DOMContentLoaded', function() { 
+              appendAll(config, [launcher, Modalator.dialog(config)])
+          });
+      })('single-dialog');
+    </script>
+    <div class="container">
+      <h3 class="text-primary">Single Dialog</h3>
+      <div id="single-dialog-config"></div>
+      <div id="single-dialog-modal"></div>
+      <div id="single-dialog-output" class="output"></div>
+    </div>
+    <!-- /Single Dialog -->
+
+    <!-- Dialog w/ Confirm -->
+    <script>
+      (function(dialogId) {
+          var hashId = '#' + dialogId;
+
+          var launcher = Modalator.launcher.button({
+              text: 'Dialog w/ Confirm', attrs: {href: hashId}
+          });
+
+          var dialog, confirmDialog;
+
+          var config = {
+              title: {text: 'Dialog w/ Confirm', tag: 'h3'},
+              attrs: {id: dialogId, 'data-width': 360},
+              affirm: {text: 'Save'},
+              fields: [{
+                  label: {text: 'Field 1'},
+                  type: 'text',
+                  attrs: {name: 'input-1', value: 'Foobar.'}
+              }, {
+                  label: {text: 'Field 2'},
+                  type: 'select',
+                  attrs: {name: 'input-2'},
+                  options: [
+                      {text: 'One', attrs: {value: 'opt-1'}},
+                      {text: 'Two', attrs: {value: 'opt-2'}}
+                  ],
+              }],
+              confirmCallback: function() {
+                  var confirmId = confirmDialog.getAttribute('id');
+                  $('#' + confirmId).modal('hide');
+                  $(hashId).modal('hide');
+                  $(hashId + '-output').append(
+                      ltgt('&lt;span&gt;Sent &lt;b&gt;')
+                      + $(hashId + ' [name="input-1"]').val() 
+                      + ltgt('&lt;/b&gt; , &lt;b&gt;')
+                      + $(hashId + ' [name="input-2"]').val() 
+                      + ltgt('&lt;/b&gt;&lt;/span&gt;')
+                  );
+              }
+          };
+
+          document.addEventListener('DOMContentLoaded', function() { 
+              [dialog, confirmDialog] = Modalator.dialogWithConfirm(config);
+              appendAll(config, [launcher, dialog, confirmDialog]);
+          });
+      })('dialog-with-confirm');
+    </script>
+    <div class="container">
+      <h3 class="text-primary">Dialog w/ Confirm</h3>
+      <div id="dialog-with-confirm-config"></div>
+      <div id="dialog-with-confirm-modal"></div>
+      <div id="dialog-with-confirm-output" class="output"></div>
+    </div>
+    <!-- /Dialog w/ Confirm -->
+
+    <div style="height:20px"></div>
+    <footer>
+      <div class="container">
+        <a href="https://github.com/joeldalley/modalator.js">modalator.js</a>. 
+        Copyright &copy; Joel Dalley 2014.
+      </div>
+    </footer>
+  </body>
+</html>
